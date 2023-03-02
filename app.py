@@ -220,7 +220,7 @@ st.table(df_filtrado[['Título', 'Año', 'Director']])
 
 
 
-st.write("Películas por género y año:")
+st.write("Películas por género y año: (hay muchas vacías)")
 
 #lista con todos los géneros únicos
 generos = sorted(df['Género'].unique())
@@ -240,3 +240,44 @@ df_filtrado = df[(df['Género'] == selected_genero) & (df['Año'] == selected_an
 
 st.table(df_filtrado[['Título', 'Director']])
 
+
+
+
+
+st.write("¿Qué porcentaje de cada género sale en cada año?")
+
+anios = sorted(df['Año'].unique())
+
+# Agregar un selector de año en la interfaz de Streamlit
+selected_anio = st.selectbox('Seleccione un año', anios)
+
+# Filtrar el DataFrame según el año seleccionado
+df_filtrado = df[df['Año'] == selected_anio]
+
+# Calcular el porcentaje de películas por género
+pct_por_genero = df_filtrado['Género'].value_counts(normalize=True) * 100
+
+# Crear una tabla con los porcentajes de cada género por año
+tabla_porc_generos = pd.DataFrame({'Porcentaje': pct_por_genero})
+tabla_porc_generos.index.name = 'Género'
+tabla_porc_generos = tabla_porc_generos.reset_index()
+tabla_porc_generos['Año'] = selected_anio
+tabla_porc_generos = tabla_porc_generos[['Género', 'Porcentaje']]
+tabla_porc_generos = tabla_porc_generos.sort_values('Porcentaje', ascending=False)
+
+# Mostrar la tabla de porcentajes
+st.write("Porcentaje de películas por género en el año seleccionado:")
+st.table(tabla_porc_generos)
+
+
+
+
+# Selector de duración máxima en minutos
+max_dur_min = st.slider('Seleccione la duración mínima a partir de la que le interesan las peliculas:', 0, int(df['Duración (Minutos)'].max()), 160)
+
+# Filtrar el DataFrame según la duración máxima seleccionada
+df_filtrado = df[df['Duración (Minutos)'] >= max_dur_min]
+
+# Mostrar los resultados
+st.write(f"Películas por duración:")
+st.table(df_filtrado[['Título', 'Género', 'Director', 'Duración (Minutos)']])

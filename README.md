@@ -1,8 +1,5 @@
 # 📈 Cuadro de mandos personal 📊
  
-
- https://www.football-data.co.uk/spainm.php
-
  
 > Usa este repositorio para crear un cuadro de mandos personal con Streamlit. Documenta los siguientes apartados del README.
 > Incluye en tu README la url de donde has publicado tu aplicación. Pon la `url` también en el `About` de tu repositorio.

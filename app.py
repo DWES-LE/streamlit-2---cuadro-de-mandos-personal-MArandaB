@@ -48,13 +48,13 @@ st.pyplot(grafico_calificacion_duracion.get_figure())
 
 
 
-# Obtener los actores que más aparecen
+# actores que más aparecen
 top_actores = df['Actores'].str.split(', ').explode().value_counts().head(10)
 
-# Renombrar las columnas en español
+# Renombra columnas en español
 top_actores = top_actores.rename_axis('Actor').reset_index(name='Apariciones')
 
-# Mostrar la tabla
+
 st.write("Actores que más aparecen en esta lista:")
 st.table(top_actores)
 
@@ -142,13 +142,12 @@ st.altair_chart(grafico_calificacion_promedio, use_container_width=True)
 # Agrupar las películas por año y encontrar la fila con la calificación más alta para cada grupo
 idx = df.groupby('Año')['Calificación'].idxmax()
 
-# Seleccionar las filas correspondientes de la tabla original y ordenarlas por año
+# filas correspondientes de la tabla original y ordenarlas por año
 top_movies = df.loc[idx, ['Título', 'Año', 'Calificación']].sort_values('Año')
 
-# Redondear la columna "Calificación" a 2 decimales
+#la columna Calificación a 2 decimales
 top_movies['Calificación'] = top_movies['Calificación'].apply(lambda x: round(x, 2))
 
-# Mostrar la tabla en Streamlit
 st.write("Película más valorada por cada año:")
 st.table(top_movies)
 
@@ -156,11 +155,11 @@ st.table(top_movies)
 
 
 
-# Seleccionar solo las películas de los años 2014
+# las películas de los años 2014
 st.write("Puntuación de Metacritic para películas de IMDB en 2014:")
 df_filtered = df[(df['Año'] == 2014)]
 
-# Crear el gráfico de barras
+# gráfico de barras
 bars = alt.Chart(df_filtered).mark_bar().encode(
     x=alt.X('Puntuación:Q', axis=alt.Axis(title='Puntuación')),
     y=alt.Y('Título:N', axis=alt.Axis(title='Película'))
@@ -169,7 +168,7 @@ bars = alt.Chart(df_filtered).mark_bar().encode(
 # Agregar título al gráfico
 title = alt.Chart({'values': [{'text': 'Puntuación de Metacritic para películas de IMDB'}]}).mark_text(size=20, align='center').encode(text='text:N')
 
-# Mostrar el gráfico
+
 st.altair_chart(bars + title, use_container_width=True)
 
 
@@ -179,10 +178,65 @@ st.write("Géneros menos votados:")
 # Calcular la media de votos por género y ordenar de menor a mayor media
 media_votos_por_genero = df.groupby('Género')['Votos'].mean().sort_values()
 
-# Tomar los 5 géneros con la media de votos más baja
+#  5 géneros con la media de votos más baja
 generos_menos_votados = media_votos_por_genero.head(5)
 
-# Mostrar los resultados en una tabla con Streamlit
 st.write(generos_menos_votados)
 
+
+
+#lista con todos los directores únicos en el DataFrame
+directores = sorted(df['Director'].unique())
+
+#añade selector de director en la interfaz de Streamlit
+selected_director = st.selectbox('Seleccione un director', directores)
+
+# Filtrado de el DataFrame según el director seleccionado
+df_filtrado = df[df['Director'] == selected_director]
+
+# Obtener una lista de películas dirigidas por el director seleccionado
+peliculas = df_filtrado['Título'].tolist()
+
+
+st.write('Director:', selected_director)
+st.table(df_filtrado[['Título', 'Año', 'Género']])
+
+
+
+
+#lista con todos los géneros únicos en el DataFrame
+generos = sorted(df['Género'].unique())
+
+#Agrega un selector de género en la interfaz de Streamlit
+selected_genero = st.selectbox('Seleccione un género', generos)
+
+#Filtra DataFrame según el género seleccionado
+df_filtrado = df[df['Género'] == selected_genero]
+
+#tabla con las películas del género seleccionado
+st.table(df_filtrado[['Título', 'Año', 'Director']])
+
+
+
+
+
+st.write("Películas por género y año:")
+
+#lista con todos los géneros únicos
+generos = sorted(df['Género'].unique())
+
+#selector de género en la interfaz
+selected_genero = st.selectbox('Seleccione un género', generos, key='genero_selector')
+
+#lista con todos los años únicos 
+anios = sorted(df['Año'].unique())
+
+
+selected_anio = st.selectbox('Seleccione un año', anios, key='anio_selector')
+
+#Filtra el DataFrame según el género y año seleccionados
+df_filtrado = df[(df['Género'] == selected_genero) & (df['Año'] == selected_anio)]
+
+
+st.table(df_filtrado[['Título', 'Director']])
 

@@ -155,25 +155,6 @@ st.table(top_movies)
 
 
 
-# las películas de los años 2014
-st.write("Puntuación de Metacritic para películas de IMDB en 2014:")
-df_filtered = df[(df['Año'] == 2014)]
-
-# gráfico de barras
-bars = alt.Chart(df_filtered).mark_bar().encode(
-    x=alt.X('Puntuación:Q', axis=alt.Axis(title='Puntuación')),
-    y=alt.Y('Título:N', axis=alt.Axis(title='Película'))
-)
-
-# Agregar título al gráfico
-title = alt.Chart({'values': [{'text': 'Puntuación de Metacritic para películas de IMDB'}]}).mark_text(size=20, align='center').encode(text='text:N')
-
-
-st.altair_chart(bars + title, use_container_width=True)
-
-
-
-
 st.write("Géneros menos votados:")
 # Calcular la media de votos por género y ordenar de menor a mayor media
 media_votos_por_genero = df.groupby('Género')['Votos'].mean().sort_values()
@@ -272,12 +253,61 @@ st.table(tabla_porc_generos)
 
 
 
-# Selector de duración máxima en minutos
+# Selector de duración máxima en minutos, por defecto en 160 min para que no salga la lista entera
 max_dur_min = st.slider('Seleccione la duración mínima a partir de la que le interesan las peliculas:', 0, int(df['Duración (Minutos)'].max()), 160)
 
-# Filtrar el DataFrame según la duración máxima seleccionada
+#Filtra el DataFrame según la duración máxima seleccionada
 df_filtrado = df[df['Duración (Minutos)'] >= max_dur_min]
 
-# Mostrar los resultados
+
 st.write(f"Películas por duración:")
 st.table(df_filtrado[['Título', 'Género', 'Director', 'Duración (Minutos)']])
+
+
+
+# Define las opciones de selección del usuario
+year_options = sorted(list(df['Año'].unique()))
+
+# Crea un sidebar con el selector de opciones
+st.sidebar.title("Elija el año cuyas calificaciones desea ver: (penultima gráfica)")
+year = st.sidebar.selectbox("Año", year_options)
+
+# Filtra los datos según el año seleccionado
+df_filtered = df[df['Año'] == year]
+
+# Crea el gráfico de barras
+bars = alt.Chart(df_filtered).mark_bar().encode(
+    x=alt.X('Puntuación:Q', axis=alt.Axis(title='Puntuación')),
+    y=alt.Y('Título:N', axis=alt.Axis(title='Película'))
+)
+
+# Agregar título al gráfico
+title = alt.Chart({'values': [{'text': f"Puntuación de Metacritic para películas de IMDB en {year}"}]}).mark_text(size=20, align='center').encode(text='text:N')
+
+# Muestra el gráfico en la aplicación de Streamlit
+st.title(f"Puntuación de Metacritic para películas de IMDB en {year}")
+st.altair_chart(bars + title, use_container_width=True)
+
+
+
+
+
+# Crea un sidebar para que el usuario ingrese manualmente la calificación que desea buscar
+st.sidebar.title("Buscar películas por calificación de críticos (saldrá en la última gráfica)")
+rating_input = st.sidebar.text_input("Introduce una calificación (de 0.0 a 10.0) es PUNTO, no coma:")
+
+# Convierte la entrada del usuario a un número de punto flotante
+try:
+    rating = float(rating_input)
+except ValueError:
+    st.stop()
+
+# Filtra los datos según la calificación introducida por el usuario
+filtered_data = df[df['Calificación'] == rating]
+
+# Muestra una tabla con los títulos y directores de las películas con la calificación introducida por el usuario
+if not filtered_data.empty:
+    st.title("Películas con calificación de " + str(rating))
+    st.write(filtered_data[["Título", "Director", "Año"]])
+else:
+    st.title("No se encontraron películas con calificación " + str(rating))
